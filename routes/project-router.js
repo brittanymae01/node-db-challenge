@@ -2,6 +2,7 @@ const express = require("express");
 
 const Projects = require("./project-model");
 const Tasks = require("./tasks-model");
+const Resources = require("./resources-model");
 
 const router = express.Router();
 
@@ -104,7 +105,7 @@ router.get("/:id/resources", (req, res) => {
     .then(resource => {
       if (!resource) {
         return res.status(404).json({
-          errorMessage: "id does not exist"
+          errorMessage: "id for that does not exist"
         });
       }
       return res.status(200).json(resource);
@@ -113,6 +114,52 @@ router.get("/:id/resources", (req, res) => {
       console.log(error);
       return res.status(500).json({
         errorMessage: "problem retreiving tasks"
+      });
+    });
+});
+
+router.post("/:id/resources", (req, res) => {
+  if (!req.body.name) {
+    return res.status(400).json({
+      errorMessage: "please provide a name for this resource"
+    });
+  }
+
+  Projects.getProject(req.params.id)
+    .then(project => {
+      if (!project) {
+        return res.status(404).json({
+          errorMessage: "could not find project id"
+        });
+      } else {
+        Resources.addResource(req.body)
+          .then(resource => {
+            Resources.addResourceToProject({
+              project_id: req.params.id,
+              resources_id: resource.id
+            })
+              .then(newresource => {
+                return res.status(201).json(newresource);
+              })
+              .catch(error => {
+                console.log(error);
+                return res.status(500).json({
+                  errorMessage: "problem adding resource to project"
+                });
+              });
+          })
+          .catch(error => {
+            console.log(error);
+            return res.status(500).json({
+              errorMessage: "problem adding resource to database"
+            });
+          });
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      return res.status(500).json({
+        errorMessage: "problem finding project"
       });
     });
 });
