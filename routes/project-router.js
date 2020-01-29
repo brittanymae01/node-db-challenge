@@ -164,4 +164,42 @@ router.post("/:id/resources", (req, res) => {
     });
 });
 
+router.post("/:id/resources/name", (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({
+      errorMessage: "please provide a name for this resource"
+    });
+  }
+
+  Projects.getProject(req.params.id).then(project => {
+    if (!project) {
+      return res.status(404).json({
+        errorMessage: "could not find project id"
+      });
+    } else {
+      Resources.getResourceByName({ name }).then(resource => {
+        if (!resource) {
+          return res
+            .status(404)
+            .json({ errorMessage: "could not find resource by this name" });
+        }
+        Resources.addResourceToProject({
+          project_id: req.params.id,
+          resources_id: resource.id
+        })
+          .then(newresource => {
+            return res.status(201).json(newresource);
+          })
+          .catch(error => {
+            console.log(error);
+            return res.status(500).json({
+              errorMessage: "problem adding resource to project"
+            });
+          });
+      });
+    }
+  });
+});
+
 module.exports = router;

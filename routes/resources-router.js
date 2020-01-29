@@ -35,4 +35,21 @@ router.post("/", (req, res) => {
     });
 });
 
+router.post("/name", (req, res) => {
+  let { name } = req.body;
+
+  Resources.getResourceByName({ name })
+    .then(resource => {
+      if ({ name }) {
+        return res.json(resource);
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ errorMessage: "cannot get resource by the name" });
+    });
+});
+
 module.exports = router;

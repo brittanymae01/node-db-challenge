@@ -4,7 +4,8 @@ module.exports = {
   getResources,
   getResource,
   addResource,
-  addResourceToProject
+  addResourceToProject,
+  getResourceByName
 };
 
 function getResources() {
@@ -17,6 +18,13 @@ function getResource(id) {
     .first();
 }
 
+function getResourceByName(filter) {
+  return db("resources")
+    .select("id", "name")
+    .where(filter)
+    .first();
+}
+
 function addResource(resource) {
   return db("resources")
     .insert(resource)
@@ -25,9 +33,9 @@ function addResource(resource) {
     });
 }
 
-function addResourceToProject(projectId, resourceId) {
+function addResourceToProject(info) {
   return db("project_details")
-    .insert(projectId, resourceId)
+    .insert(info)
     .then(ids => {
       return ids;
     })
